@@ -23,7 +23,7 @@ const DIN_IMG = "https://picsum.photos/300/300";
         praesentium, enim architecto recusandae quis.
       </div>
       <div class="grid_item">
-        <img src="https://picsum.photos/400/500" alt="image" />
+        <img src="https://picsum.photos/600/500" alt="image" />
       </div>
       <div class="grid_item">
         <img src="https://picsum.photos/350/500" alt="image" />
@@ -49,7 +49,9 @@ const DIN_IMG = "https://picsum.photos/300/300";
   display: grid;
   gap: 15px;
   justify-content: center;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 300px));
+  // grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+
+  grid-auto-flow: dense;
 
   // grid-template-rows: repeat(auto-fit, minmax(150px, 1fr));
   //   grid-auto-rows: minmax(100px, auto);
@@ -60,10 +62,15 @@ const DIN_IMG = "https://picsum.photos/300/300";
 //   //   height: 350px;
 
 // }
+.grid_container {
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 .grid_item img {
   width: 100%;
   height: 100%;
-  // object-fit: cover;
+  object-fit: cover;
 }
 .grid_item:nth-child(1) {
   font-size: 16px;
