@@ -1,4 +1,13 @@
-<script setup></script>
+<script setup>
+const coll = ref([]);
+
+onMounted(() => {
+  const rame = document.querySelectorAll(".img_block");
+  coll.value.push(rame);
+});
+
+console.log(coll.value);
+</script>
 <template>
   <div class="rooms_block">
     <div class="container">
@@ -24,7 +33,7 @@
       </div>
       <div class="column_right">
         <div class="img_block">
-          <div class="img_container3">
+          <div class="img_container3 active">
             <img src="../../assets/img/21.png" alt="image" />
           </div>
           <div class="img_container4">
@@ -173,6 +182,7 @@
           position: relative;
           width: 100%;
           height: 0;
+          clip-path: inset(0 0 0 100%);
           padding-top: calc(100% / (826 / 540));
 
           img {
@@ -183,6 +193,11 @@
             top: 0;
             left: 0;
             object-fit: cover;
+          }
+          &.active {
+            clip-path: inset(0 0 0 0);
+            transition: 2s cubic-bezier(0.075, 0.82, 0.165, 1) clip-path;
+            transition-delay: 3s;
           }
         }
         .img_container4 {

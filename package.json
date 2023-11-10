@@ -17,5 +17,8 @@
     "vue": "^3.3.7",
     "vue-router": "^4.2.5",
     "webpack": "^5.89.0"
+  },
+  "dependencies": {
+    "swiper": "^11.0.4"
   }
 }
