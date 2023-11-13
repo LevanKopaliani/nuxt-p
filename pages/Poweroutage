@@ -1,0 +1,256 @@
+<script lang="ts" setup>
+import {
+  ConfInterface,
+  SecondaryDataDataInterface,
+  SecondaryDataInterface,
+} from "@/types/ContentType";
+import TitleShadow from "@/components/regularComponents/UIComponents/TitleShadow.vue";
+import Button from "@/components/regularComponents/UIComponents/Button.vue";
+
+const { t } = useI18n();
+
+const props = defineProps<{
+  contentData: SecondaryDataInterface | undefined;
+}>();
+
+const { data, conf } = toRaw(props.contentData) as {
+  data: SecondaryDataDataInterface;
+  conf: ConfInterface;
+};
+
+// SWIPER
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Pagination, EffectCreative } from "swiper";
+import "swiper/scss";
+import PowerOutageCard from "./Parts/PowerOutageCard.vue";
+
+const breakpoints = {
+  // when window width is >= 320px
+  320: {
+    slidesPerView: 1.15,
+    spaceBetween: 12,
+    slidesOffsetBefore: 24,
+    slidesOffsetAfter: 24,
+  },
+  // when window width is >= 480px
+  374.9: {
+    slidesPerView: 1.1415,
+    spaceBetween: 12,
+    slidesOffsetBefore: 24,
+    slidesOffsetAfter: 24,
+  },
+  // when window width is >= 640px
+  719.9: {
+    slidesPerView: 1.683,
+    spaceBetween: 24,
+    slidesOffsetBefore: 32,
+    slidesOffsetAfter: 32,
+  },
+  959.9: {
+    slidesPerView: 2.674,
+    spaceBetween: 24,
+    slidesOffsetBefore: 48,
+    slidesOffsetAfter: 48,
+  },
+  1279.9: {
+    slidesPerView: 3,
+    spaceBetween: 32,
+    slidesOffsetBefore: 64,
+    slidesOffsetAfter: 64,
+  },
+  1439: {
+    slidesPerView: 3,
+    spaceBetween: 32,
+    slidesOffsetBefore: 128,
+  },
+  1919: {
+    slidesPerView: 3,
+    spaceBetween: 48,
+    slidesOffsetBefore: 128,
+  },
+};
+//// SWIPER TRANSITION
+
+function transitionStart(e) {
+  // console.log(e.swipeDirection);
+  if (e.swipeDirection == "next") {
+    const slidesVisible = e.slides.filter((slide, index) =>
+      slide?.classList?.contains("swiper-slide-visible")
+    );
+    slidesVisible.forEach((slide, index) => {
+      slide.style.transitionDelay = `${135 + index * 45}ms`;
+    });
+  }
+  if (e.swipeDirection == "prev") {
+    const slidesVisible = e.slides.filter((slide, index) =>
+      slide?.classList?.contains("swiper-slide-visible")
+    );
+    slidesVisible.forEach((slide, index) => {
+      slide.style.transitionDelay = `${225 - index * 45}ms`;
+    });
+  }
+}
+function transitionEnd(e) {
+  e.slides.forEach((slide) => (slide.style.transitionDelay = `0ms`));
+}
+
+//@slide-change="(e) => console.log(e)"
+///@slide-change-transition-start="detectDirection"
+// slideChangeTransitionStart - - - - mushaobs
+// /transition-end ----------- musahobs
+//transitionEnd --- cda
+
+///// state.actualDelay[index]
+//transitionDelay: `${state.actualDelay[index]}ms`,
+//// state.sliderIndex * (state.itemSize + state.sapceBtw)
+///
+///transitionDelay: `${state.actualDelay[index]}ms`,
+///transform: `translate3d(${state.items[index] + state.sapceBtw}px, 0px, 0px)`,
+///
+</script>
+<template>
+  <div class="poweroutage">
+    <div class="poweroutage__title container">
+      <TitleShadow class="poweroutage__title__shadow" :title="conf?.header?.title" />
+      <router-link :to="conf.header?.full_list_url">
+        <Button
+          class="poweroutage__title__readmore"
+          :btnText="conf?.header?.full_list_title"
+          :btn-type="2"
+        />
+      </router-link>
+    </div>
+    <div class="poweroutage__slider">
+      <swiper
+        @transition-start="transitionStart"
+        @transition-end="transitionEnd"
+        :space-between="48"
+        :breakpoints="{}"
+        :slides-per-view="3"
+        :virtualTranslate="false"
+        :modules="[EffectCreative]"
+        :centered-slides="false"
+        :effect="'creative'"
+        :creative-effect="{
+          progressMultiplier: 1,
+          perspective: true,
+          limitProgress: 9,
+          prev: { translate: ['-100%', 0, 0], rotate: [0, 0, 0] },
+          next: { translate: ['100%', 0, 0], rotate: [0, 0, 0] },
+        }"
+      >
+        <SwiperSlide
+          v-for="(post, index) in data?.list"
+          class="poweroutage__slider__item"
+          :style="{}"
+        >
+          <PowerOutageCard :data="post" />
+        </SwiperSlide>
+      </swiper>
+    </div>
+  </div>
+</template>
+<style lang="scss">
+.swiper-wrapper {
+  // height: 300px;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+.swiper-slide {
+  padding: 0 24px;
+  // transition-delay: 700ms !important;
+  transition-duration: 720ms !important;
+}
+.swiper-slide-visible.swiper-slide-fully-visible {
+}
+.poweroutage {
+  background-color: $gray20;
+  padding: 128px 0;
+  @include maxq(desktop-sm) {
+    padding: 44px 0 64px 0;
+  }
+  @media (max-width: 1279.9px) {
+    padding: 52px 0;
+  }
+  @media (max-width: 719.9px) {
+    padding: 40px 0;
+  }
+  @media (max-width: 375.9px) {
+    padding: 32px 0;
+  }
+
+  &__title {
+    // padding-left: 164px;
+    // padding-right: 128px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    @include maxq(desktop-sm) {
+      align-items: flex-end;
+    }
+    @media (max-width: 1279.9px) {
+      // padding-left: 70px;
+      // padding-right: 22px;
+    }
+    &__shadow {
+      @media (max-width: 1279.9px) {
+        margin-left: 70px;
+      }
+      @media (max-width: 959.9px) {
+        margin: unset;
+      }
+    }
+    &__readmore {
+      margin-right: 48px;
+      @include maxq(desktop-sm) {
+        margin-right: unset;
+        margin-bottom: 20px;
+        max-height: 46px;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      @media (max-width: 1279.9px) {
+        margin-bottom: unset;
+        margin-right: 20px;
+      }
+      @media (max-width: 959.9px) {
+        margin-right: 48px;
+      }
+      @media (max-width: 719.9px) {
+        display: none;
+      }
+    }
+  }
+  &__slider {
+    margin-top: 64px;
+    @include maxq(desktop-sm) {
+      margin-top: 32px;
+    }
+    @media (max-width: 1279.9px) {
+      margin-top: 32px;
+    }
+    @media (max-width: 959.9px) {
+      margin-top: 24px;
+    }
+    @media (max-width: 719.9px) {
+      margin-top: 24px;
+    }
+
+    @media (min-width: 960px) {
+      .swiper-slide-next ~ .swiper-slide-visible {
+        opacity: 0.4;
+      }
+    }
+    @media (max-width: 959.9px) {
+      .swiper-slide-active ~ .swiper-slide-next {
+        opacity: 0.4;
+      }
+    }
+
+    &__item {
+      // position: absolute;
+      // transition-duration: 300ms;
+    }
+  }
+}
+</style>
