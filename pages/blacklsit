@@ -1,0 +1,276 @@
+<script lang="ts" setup>
+import { SecondaryDataInterface } from "~/types/ContentType";
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useMainStore } from "~/store/main";
+import TitleShadow from "@/components/regularComponents/UIComponents/TitleShadow.vue";
+import Pagination from "~/components/regularComponents/UIComponents/Pagination/Pagination.vue";
+import { reqAxios } from "~/composables/core/func";
+
+const { t } = useI18n();
+const i18nLocale = useI18n();
+
+const props = defineProps<{
+  contentData: SecondaryDataInterface | undefined;
+}>();
+
+console.log(props.contentData);
+
+const { data, conf } = props.contentData;
+const confTitle = computed(() => props.contentData?.conf?.header?.title);
+
+const router = useRouter();
+const route = useRoute();
+const store = useMainStore();
+
+watch(
+  route,
+  async (n) => {
+    // if (!store.terms?.blacklist?.length) {
+    //   await store.setTaxonomy("blacklist");
+    // }
+    // OutageList.value = await fetchData(state, props.contentData);
+    store.doTriggerUpdate(500);
+  },
+  { immediate: true }
+);
+
+const listView = ref(true);
+
+// <div class="outageList__pagination wc">
+//   <Pagination
+//     v-if="OutageList?.listCount > state.perPage"
+//     :total="OutageList?.listCount"
+//     :per-page="state.perPage"
+//   />
+// </div>
+
+// store.addWord(["table view", "grid view"]);
+
+const tableheading = [
+  "Supplier",
+  "Address",
+  "ID Number",
+  "Reason",
+  "Blocked From",
+  "Blocked Till",
+];
+
+const tablelist = ref();
+let pos = { left: 0, x: 0 };
+function mousedownHandler(e) {
+  pos = {
+    left: tablelist.value.scrollLeft,
+    x: e.clientX,
+  };
+
+  tablelist.value.addEventListener("mousemove", mouseMoveHandler);
+  tablelist.value.addEventListener("mouseup", mouseUpHandler);
+}
+const mouseMoveHandler = function (e) {
+  const dx = e.clientX - pos.x;
+  tablelist.value.scrollLeft = pos.left - dx;
+};
+const mouseUpHandler = function () {
+  tablelist.value.removeEventListener("mousemove", mouseMoveHandler);
+  tablelist.value.removeEventListener("mouseup", mouseUpHandler);
+};
+</script>
+<template>
+  <section class="blacklist">
+    <div class="blacklist__overlay"></div>
+    <div class="blacklist__header">
+      <div class="blacklist__header-title">
+        <TitleShadow :title="confTitle" />
+      </div>
+
+      <div class="blacklist__header-view">
+        <div
+          class="blacklist__header-view-icon"
+          :class="{ 'blacklist__header-view-icon--active': listView }"
+          @click="listView = true"
+        >
+          <SmartComponentsBlackListAssetsTableIcon />
+
+          <p>{{ $t("table view") }}</p>
+        </div>
+        <div
+          class="blacklist__header-view-icon"
+          :class="{ 'blacklist__header-view-icon--active': !listView }"
+          @click="listView = false"
+        >
+          <SmartComponentsBlackListAssetsGridIcon />
+          <p>{{ $t("grid view") }}</p>
+        </div>
+      </div>
+    </div>
+
+    <article class="blacklist__list" ref="tablelist" @mousedown="mousedownHandler">
+      <table class="blacklist__list-table">
+        <thead>
+          <tr>
+            <th v-for="(item, index) in tableheading" :key="index">{{ item }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in data?.list" :key="index">
+            <td :title="item.title">{{ item.title }}</td>
+            <td :title="item.address" class="blacklist__list-table-address">
+              <span><SmartComponentsBlackListAssetsAddresIcon /></span>
+              <p>{{ item.address }}</p>
+            </td>
+            <td>{{ item.id_number }}</td>
+            <td :title="item.reason">
+              {{ item.reason }}
+            </td>
+            <td>{{ item.from_date }}</td>
+            <td>{{ item.blocked_for }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+    <!-- <div class="scrollbar"></div> -->
+  </section>
+</template>
+
+<style lang="scss">
+.blacklist {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: var(--viewportW);
+  min-height: var(--minHeight);
+  padding: var(--paddingXSmall-v) var(--padding-h) var(--paddingSmall-v) var(--padding-h);
+  gap: var(--spaceBetween-M);
+
+  &__overlay {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width: var(--viewportW);
+    height: var(--containerOverlayBgH);
+    background-color: var(--secondaryBackground);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spaceBetween-S);
+    align-self: stretch;
+    // &--title {
+    //   // @include fadeUpView;
+    // }
+    &-view {
+      display: flex;
+      align-items: center;
+      margin-right: var(--moreButtonMarginR);
+      gap: var(--spaceBetween-M);
+      &-icon {
+        cursor: pointer;
+        display: flex;
+        gap: 6px;
+        p {
+          color: var(--textColor);
+          text-transform: capitalize;
+          display: flex;
+          align-items: center;
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 28px;
+        }
+
+        &--active {
+          p {
+            color: var(--title);
+          }
+          path {
+            fill: var(--buttonBackground);
+          }
+        }
+      }
+    }
+  }
+
+  &__items {
+    @include fadeUpView;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-columns: 1fr;
+    grid-auto-rows: 1fr;
+    gap: var(--spaceBetween-M);
+    align-self: stretch;
+    z-index: 5;
+    @include maxq(tab-landscape) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @include maxq(mobile) {
+      grid-template-columns: 1fr;
+    }
+    .poweroutage__card {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &__list {
+    overflow: auto;
+    cursor: grab;
+    user-select: none;
+    @include scrollbar;
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+    &-table {
+      margin-bottom: 16px;
+      thead {
+        th {
+          text-align: left;
+        }
+      }
+      th,
+      td {
+        max-width: 335px;
+        line-clamp: 1;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        padding: var(--spaceBetween-S) var(--spaceBetween-M);
+        white-space: nowrap;
+        // display: flex;
+        // justify-content: center;
+        // align-items: center;
+      }
+      tbody {
+        border: 1px solid var(--border);
+        tr {
+          border-bottom: 1px solid var(--border);
+          background-color: var(--cardBackground);
+        }
+      }
+      &-address,
+      span {
+        display: flex;
+        // flex: 1;
+        gap: var(--spaceBetween-XS);
+        align-items: center;
+        p {
+          line-clamp: 1;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+  // .scrollbar {
+  //   overflow-x: scroll;
+  //   @include scrollbar;
+  // }
+}
+</style>
